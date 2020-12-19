@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Techmino
+Comment=A block stacking game developed by Chinese developer MrZ, using the Love2D engine.
+Exec=techmino
+Icon=techmino
+Terminal=false
+StartupNotify=false
+Categories=Application;Game;

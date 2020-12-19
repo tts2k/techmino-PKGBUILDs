@@ -1,0 +1,26 @@
+pkgname=lua51-ccloader-git
+pkgver=v0.2.r36.ga15d499
+pkgrel=1
+pkgdesc="A love2d/lua wrapper for cold clear, to use in tetris game made with love2d"
+arch=('x86_64')
+url="https://github.com/26F-Studio/Techmino0.12"
+license=('MPL2')
+depends=('lua51')
+makedepends=('git')
+source=("$pkgname::git+https://github.com/26F-Studio/cold_clear_ai_love2d_wrapper")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$pkgname"
+    git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+    cd "$pkgname"
+    gcc --shared cold_clear_wrapper.c -o CCloader.so
+}
+
+package() {
+    install -Dm755 "$pkgname"/CCloader.so "$pkgdir"/usr/lib/lua/5.1/CCloader.so
+    install -Dm644 "$srcdir"/"$pkgname"/LICENSE "$pkgdir"/usr/share/licenses/"$pkgname"/LICENSE
+}

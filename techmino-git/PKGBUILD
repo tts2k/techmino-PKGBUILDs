@@ -1,0 +1,51 @@
+_pkgname=techmino
+pkgname=techmino-git
+pkgver=v0.12.7.r18.gecc1ae8
+pkgrel=1
+pkgdesc="A block stacking game developed by Chinese developer MrZ, using the Love2D engine."
+arch=('x86_64')
+url="https://github.com/26F-Studio/Techmino0.12"
+license=('LGPL')
+depends=('love' 'libcold-clear-git' lua51-ccloader-git)
+makedepends=('git' 'go')
+source=("$_pkgname::git+https://github.com/26F-Studio/Techmino"
+        "git+https://github.com/26F-Studio/TechminoOnline"
+        techmino.desktop
+        techmino.sh)
+sha256sums=('SKIP'
+            'SKIP'
+            '1d8022026c5608384f8edf87d60b474fd506f7a69ac4e4ebff76f81355420df6'
+            '705201dbaca4e1d23defbb32192a062b22ba9a0f85d606dce0292e69fc6c0139')
+
+pkgver() {
+    cd "$_pkgname"
+    git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+    # Build TechminoOnline
+    cd "$srcdir"/TechminoOnline
+    CGO_ENABLED=1 GO111MODULE=on GOPROXY=https://goproxy.io \
+      go build -x -ldflags "-w -s -extldflags \"-L$PWD\"" \
+      -buildmode="c-shared" -o "client.so" -v \
+      -tags 'osusergo netgo' ./cmd/client
+    
+}
+
+package() {
+    # Package game files
+    cd $srcdir/$_pkgname
+    if [ -e "$_pkgname.love" ]; then
+        rm $_pkgname.love
+    fi
+    zip -9 -r $_pkgname.love .
+
+    # Copy game and license
+    install -Dm0644 "$srcdir"/"$_pkgname"/"$_pkgname.love" "$pkgdir"/usr/share/$pkgname/$_pkgname.love
+    install -Dm0644 "$srcdir"/TechminoOnline/client.so "$pkgdir"/usr/lib/$_pkgname/client.so
+    install -Dm0644 "$srcdir"/"$_pkgname"/LICENSE "$pkgdir"/usr/share/licenses/$_pkgname/LICENSE
+    # Copy desktop file, icon and run script
+    install -Dm0644 "$srcdir"/"$_pkgname"/media/image/icon.png "$pkgdir"/usr/share/pixmaps/"$_pkgname".png
+    install -Dm0644 "$startdir"/"$_pkgname".desktop "$pkgdir"/usr/share/applications/"$_pkgname".desktop
+    install -Dm0755 "$startdir"/"$_pkgname".sh "$pkgdir"/usr/bin/"$_pkgname"
+}
