@@ -1,6 +1,6 @@
 _pkgname=techmino
 pkgname=techmino-git
-pkgver=v0.12.7.r18.gecc1ae8
+pkgver=v0.12.7.r21.ga38e1f2
 pkgrel=1
 pkgdesc="A block stacking game developed by Chinese developer MrZ, using the Love2D engine."
 arch=('x86_64')
@@ -46,6 +46,6 @@ package() {
     install -Dm0644 "$srcdir"/"$_pkgname"/LICENSE "$pkgdir"/usr/share/licenses/$_pkgname/LICENSE
     # Copy desktop file, icon and run script
     install -Dm0644 "$srcdir"/"$_pkgname"/media/image/icon.png "$pkgdir"/usr/share/pixmaps/"$_pkgname".png
-    install -Dm0644 "$startdir"/"$_pkgname".desktop "$pkgdir"/usr/share/applications/"$_pkgname".desktop
-    install -Dm0755 "$startdir"/"$_pkgname".sh "$pkgdir"/usr/bin/"$_pkgname"
+    install -Dm0644 "$srcdir"/"$_pkgname".desktop "$pkgdir"/usr/share/applications/"$_pkgname".desktop
+    install -Dm0755 "$srcdir"/"$_pkgname".sh "$pkgdir"/usr/bin/"$_pkgname"
 }
