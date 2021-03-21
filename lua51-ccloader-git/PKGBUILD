@@ -1,26 +1,42 @@
 pkgname=lua51-ccloader-git
-pkgver=v0.2.r36.ga15d499
+pkgver=v0.2.r37.g2942917
 pkgrel=1
 pkgdesc="A love2d/lua wrapper for cold clear, to use in tetris game made with love2d"
 arch=('x86_64')
 url="https://github.com/26F-Studio/cold_clear_ai_love2d_wrapper"
 license=('MPL2')
-depends=('lua51' 'luajit' 'libcold-clear-git')
-makedepends=('git')
-source=("$pkgname::git+https://github.com/26F-Studio/cold_clear_ai_love2d_wrapper")
-sha256sums=('SKIP')
+depends=('lua51' 'luajit')
+makedepends=('git' 'rust')
+source=("$pkgname::git+https://github.com/26F-Studio/cold_clear_ai_love2d_wrapper"
+        "git+https://github.com/MinusKelvin/cold-clear.git")
+sha256sums=('SKIP' 'SKIP')
 
 pkgver() {
     cd "$pkgname"
     git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
 }
 
+prepare() {
+    cd "$srcdir"/"$pkgname"
+    git submodule init
+    git config submodule.cold-clear.url $srcdir/cold-clear
+    git submodule update
+}
+
 build() {
-    cd "$pkgname"
-    gcc --shared cold_clear_wrapper.c -o CCloader.so
+    cd "$srcdir"/"$pkgname"/cold-clear/c-api
+    cargo build --release
+
+    cd "$srcdir"/"$pkgname"
+    gcc --shared cold_clear_wrapper.c -o CCloader.so \
+        -Lcold-clear/target/release -lcold_clear\
+        -Icold-clear/c-api/ \
+        -I/usr/include/luajit-2.0/ \
+        -Wl,-rpath,'$ORIGIN/CCloader'
 }
 
 package() {
     install -Dm755 "$pkgname"/CCloader.so "$pkgdir"/usr/lib/lua/5.1/CCloader.so
+    install -Dm755 "$pkgname"/cold-clear/target/release/libcold_clear.so "$pkgdir"/usr/lib/lua/5.1/CCloader/libcold_clear.so
     install -Dm644 "$srcdir"/"$pkgname"/LICENSE "$pkgdir"/usr/share/licenses/"$pkgname"/LICENSE
 }
